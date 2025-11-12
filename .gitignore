@@ -1,0 +1,24 @@
+# Hidden directories
+.*
+!.gitignore
+
+# ZIP packages
+*.zip
+
+# Backup files
+*~
+*.bak
+*.swp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Build artifacts
+node_modules/
+dist/
+build/
