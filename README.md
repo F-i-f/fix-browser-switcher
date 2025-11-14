@@ -14,6 +14,8 @@ A lightweight Gnome Shell extension for quick default browser switching through 
 
 Perfect for users who work with different browser profiles for different tasks (e.g., separate work and personal SSO authentication).
 
+<img width="1024" height="768" alt="1" src="https://github.com/user-attachments/assets/a0f0f2e4-cc5d-4160-af2b-e2c967b9f226" />
+
 ## Installation
 
 ### From extensions.gnome.org (Recommended)
@@ -42,7 +44,7 @@ gnome-extensions uninstall browser-switcher@totoshko88.github.io
 
 ## Requirements
 
-- Gnome Shell 45 or 46
+- Gnome Shell 45+
 - xdg-utils (typically pre-installed)
 
 ## License
