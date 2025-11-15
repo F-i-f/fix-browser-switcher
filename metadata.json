@@ -4,7 +4,10 @@
   "description": "Quick default browser switching from the system panel. Perfect for users working with different browser profiles.",
   "shell-version": [
     "45",
-    "46"
+    "46",
+    "47",
+    "48",
+    "49"
   ],
   "url": "https://github.com/totoshko88/browser-switcher"
 }
