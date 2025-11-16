@@ -24,9 +24,12 @@ export default class BrowserSwitcherExtension extends Extension {
      * Enable the extension
      * Called when the extension is enabled
      */
-    enable() {
+    async enable() {
         // Instantiate browser manager
         this._browserManager = new BrowserManager();
+        
+        // Wait for the manager to asynchronously get the current default browser
+        await this._browserManager.initialize();
         
         // Create indicator with browser manager reference
         this._indicator = new BrowserIndicator(this._browserManager);
