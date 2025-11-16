@@ -20,6 +20,21 @@ class BrowserManager {
     }
 
     /**
+     * Asynchronously initializes the manager by fetching the current default browser.
+     * This should be called from the extension's enable() method.
+     * @returns {Promise<string|null>} Promise resolving to the initial default browser ID
+     */
+    async initialize() {
+        this._currentDefault = await this.getCurrentDefaultBrowser();
+        console.log(`Browser Switcher: Initial default browser is ${this._currentDefault}`);
+        
+        // Set up monitoring *after* getting the initial value
+        this._setupFileMonitor();
+        
+        return this._currentDefault;
+    }
+
+    /**
      * Scans standard XDG directories for .desktop files and detects browsers
      * @returns {Array} Array of browser objects
      */
