@@ -15,7 +15,7 @@ class BrowserManager {
         this._changeCallbacks = [];
         this._fileMonitor = null;
         
-        // Initialize browser list
+        // Initialize browser list (this is sync but just reads files, which is ok)
         this._detectBrowsers();
     }
 
@@ -60,7 +60,11 @@ class BrowserManager {
             this._scanDirectory(path);
         }
         
-        console.log(`Browser Switcher: Found ${this._browsers.length} browsers`);
+        if (this._browsers.length === 0) {
+            console.warn('Browser Switcher: No browsers found! Please install a web browser.');
+        } else {
+            console.log(`Browser Switcher: Found ${this._browsers.length} browsers`);
+        }
     }
 
     /**
@@ -107,9 +111,14 @@ class BrowserManager {
         try {
             keyFile.load_from_file(filePath, GLib.KeyFileFlags.NONE);
             
-            // Check if this is a web browser
-            const categories = keyFile.get_string('Desktop Entry', 'Categories');
-            if (!categories || !categories.includes('WebBrowser')) {
+            // Check if this is a web browser - silently skip non-browsers
+            try {
+                const categories = keyFile.get_string('Desktop Entry', 'Categories');
+                if (!categories || !categories.includes('WebBrowser')) {
+                    return;
+                }
+            } catch (e) {
+                // No Categories field - not a browser, skip silently
                 return;
             }
             
@@ -146,33 +155,49 @@ class BrowserManager {
             }
             
         } catch (e) {
-            // Failed to parse desktop file - skip it
-            console.error(`Browser Switcher: Could not parse ${filePath}: ${e.message}`);
+            // Failed to parse desktop file - skip silently (likely not a valid desktop file)
         }
     }
 
     /**
-     * Gets the current default browser synchronously
-     * Note: This is called during initialization and needs to be sync
-     * @returns {string|null} Browser ID (desktop file name) or null if not found
+     * Gets the current default browser asynchronously.
+     * This is now async to avoid blocking the main thread.
+     * @returns {Promise<string|null>} Promise resolving to the browser ID or null
      */
-    getCurrentDefaultBrowser() {
-        // Try xdg-settings using command line
+    async getCurrentDefaultBrowser() {
+        // Try xdg-settings using async subprocess (primary method)
         try {
-            const [success, stdout] = GLib.spawn_command_line_sync('xdg-settings get default-web-browser');
+            const proc = Gio.Subprocess.new(
+                ['xdg-settings', 'get', 'default-web-browser'],
+                Gio.SubprocessFlags.STDOUT_PIPE
+            );
             
-            if (success) {
-                const browserId = new TextDecoder().decode(stdout).trim();
+            // Wait for process to complete and get output
+            const [stdout] = await new Promise((resolve, reject) => {
+                proc.communicate_utf8_async(null, null, (proc, res) => {
+                    try {
+                        const [, stdout] = proc.communicate_utf8_finish(res);
+                        resolve([stdout]);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+            });
+            
+            if (stdout) {
+                const browserId = stdout.trim();
                 if (browserId) {
                     this._currentDefault = browserId;
                     return browserId;
                 }
             }
         } catch (e) {
-            console.error(`Browser Switcher: xdg-settings failed: ${e.message}`);
+            // xdg-settings not available or failed - this is the primary detection method
+            console.log(`Browser Switcher: xdg-settings not available, trying fallback methods`);
         }
         
-        // Fallback to GSettings
+        // Fallback to GSettings (may not be available on all systems)
+        // Note: This schema is not always present, especially on non-GNOME systems
         try {
             const settings = new Gio.Settings({
                 schema_id: 'org.gnome.desktop.default-applications.web'
@@ -184,10 +209,20 @@ class BrowserManager {
                 return browserId;
             }
         } catch (e) {
-            console.error(`Browser Switcher: GSettings fallback failed: ${e.message}`);
+            // GSettings schema not available - this is expected on some systems
+            // xdg-settings is the primary method anyway
         }
         
         return null;
+    }
+
+    /**
+     * Returns the cached current default browser.
+     * Use initialize() or getCurrentDefaultBrowser() to fetch/update the value.
+     * @returns {string|null}
+     */
+    getCachedDefaultBrowser() {
+        return this._currentDefault;
     }
 
     /**
@@ -211,21 +246,16 @@ class BrowserManager {
             
             if (success) {
                 console.log(`Browser Switcher: Set default browser to ${browserId}`);
-                this._currentDefault = browserId;
-                this._notifyChange(browserId);
+                // Update our internal state *after* success
+                if (this._currentDefault !== browserId) {
+                    this._currentDefault = browserId;
+                    this._notifyChange(browserId);
+                }
                 return;
             }
         } catch (e) {
             console.error(`Browser Switcher: Failed to set default browser: ${e.message}`);
         }
-    }
-    /**
-     * Returns the cached current default browser.
-     * Use initialize() or getCurrentDefaultBrowser() to fetch/update the value.
-     * @returns {string|null}
-     */
-    getCachedDefaultBrowser() {
-        return this._currentDefault;
     }
 
     /**
@@ -237,10 +267,7 @@ class BrowserManager {
             this._changeCallbacks.push(callback);
         }
         
-        // Set up file system monitoring if not already done
-        if (!this._fileMonitor) {
-            this._setupFileMonitor();
-        }
+        // Monitoring is now set up in initialize()
     }
 
     /**
@@ -258,8 +285,10 @@ class BrowserManager {
         
         try {
             this._fileMonitor = file.monitor_file(Gio.FileMonitorFlags.NONE, null);
-            this._fileMonitor.connect('changed', () => {
-                this._onBrowserConfigChanged();
+            
+            // Use an async function for the 'changed' signal handler
+            this._fileMonitor.connect('changed', async () => {
+                await this._onBrowserConfigChanged();
             });
             
             console.log('Browser Switcher: File monitor set up successfully');
@@ -272,12 +301,13 @@ class BrowserManager {
      * Handles browser configuration file changes
      * @private
      */
-    _onBrowserConfigChanged() {
-        const newDefault = this.getCurrentDefaultBrowser();
+    async _onBrowserConfigChanged() {
+        // Get the new default without modifying state
+        const newDefault = await this.getCurrentDefaultBrowser();
         
         if (newDefault && newDefault !== this._currentDefault) {
             console.log(`Browser Switcher: Browser changed from ${this._currentDefault} to ${newDefault}`);
-            this._currentDefault = newDefault;
+            this._currentDefault = newDefault; // NOW we update the state
             this._notifyChange(newDefault);
         }
     }
