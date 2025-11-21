@@ -42,6 +42,14 @@ export default class BrowserSwitcherExtension extends Extension {
         
         // Show the indicator
         this._indicator.show();
+        
+        // Explicitly update the icon after showing to ensure it displays correctly
+        // This fixes the issue where the default icon appears after restart
+        const currentBrowser = this._browserManager.getCachedDefaultBrowser();
+        console.log(`Browser Switcher: Post-initialization icon update for browser: ${currentBrowser}`);
+        if (currentBrowser) {
+            this._indicator.updateIcon(currentBrowser);
+        }
     }
 
     /**
