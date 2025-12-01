@@ -156,7 +156,7 @@ class MenuBuilder {
             try {
                 this._selectionCallback(browserId);
             } catch (e) {
-                log(`Browser Switcher: Selection callback error: ${e.message}`);
+                console.error(`Browser Switcher: Selection callback error: ${e.message}`);
             }
         }
     }
@@ -171,7 +171,7 @@ class MenuBuilder {
         try {
             Main.notify(title, message);
         } catch (e) {
-            log(`Browser Switcher: Could not show notification: ${e.message}`);
+            console.error(`Browser Switcher: Could not show notification: ${e.message}`);
         }
     }
 

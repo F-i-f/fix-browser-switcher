@@ -95,11 +95,11 @@ class BrowserIndicator extends PanelMenu.Button {
             this._icon.gicon = gicon;
         } catch (e) {
             // If icon loading fails, use fallback
-            log(`Browser Switcher: Could not load icon ${iconName}: ${e.message}`);
+            console.error(`Browser Switcher: Could not load icon ${iconName}: ${e.message}`);
             try {
                 this._icon.gicon = Gio.icon_new_for_string('web-browser');
             } catch (fallbackError) {
-                log(`Browser Switcher: Could not load fallback icon: ${fallbackError.message}`);
+                console.error(`Browser Switcher: Could not load fallback icon: ${fallbackError.message}`);
             }
         }
     }
