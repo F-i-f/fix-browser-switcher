@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Menu builder for Gnome Browser Switcher
 
-import GObject from 'gi://GObject';
 import St from 'gi://St';
-import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import Clutter from 'gi://Clutter';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
@@ -19,10 +17,10 @@ class MenuBuilder {
         this._menuItems = new Map(); // Map browser ID to menu item
         this._selectionCallback = null;
         this._timeoutId = null;
-        
+
         // Build initial menu
         this.buildMenu();
-        
+
         // Set up browser change monitoring
         this._setupBrowserChangeMonitoring();
     }
@@ -34,19 +32,19 @@ class MenuBuilder {
         // Clear existing menu items
         this._indicator.menu.removeAll();
         this._menuItems.clear();
-        
+
         const browsers = this._browserManager.getInstalledBrowsers();
         const currentBrowserId = this._browserManager.getCachedDefaultBrowser();
-        
+
         console.log(`Browser Switcher: Building menu with ${browsers.length} browsers`);
         browsers.forEach(b => console.log(`  - ${b.name} (${b.id})`));
-        
+
         // Handle empty browser list
         if (!browsers || browsers.length === 0) {
             this._addNoBrowsersMessage();
             return;
         }
-        
+
         // Create menu item for each browser
         for (const browser of browsers) {
             this._addBrowserMenuItem(browser, currentBrowserId);
@@ -62,7 +60,7 @@ class MenuBuilder {
             reactive: false,
             can_focus: false
         });
-        
+
         this._indicator.menu.addMenuItem(item);
     }
 
@@ -77,17 +75,17 @@ class MenuBuilder {
             browser.name,
             this._getIconForBrowser(browser.icon)
         );
-        
+
         // Add checkmark for current default browser
         if (browser.id === currentBrowserId) {
             this._addCheckmark(item);
         }
-        
+
         // Add click handler
         item.connect('activate', () => {
             this._onBrowserSelected(browser.id);
         });
-        
+
         this._indicator.menu.addMenuItem(item);
         this._menuItems.set(browser.id, item);
     }
@@ -113,7 +111,7 @@ class MenuBuilder {
             style_class: 'popup-menu-ornament',
             y_align: Clutter.ActorAlign.CENTER
         });
-        
+
         item.add_child(ornament);
     }
 
@@ -125,7 +123,7 @@ class MenuBuilder {
     _onBrowserSelected(browserId) {
         // Attempt to set the default browser
         const success = this._browserManager.setDefaultBrowser(browserId);
-        
+
         if (!success) {
             // Show error notification
             this._showErrorNotification(
@@ -134,23 +132,23 @@ class MenuBuilder {
             );
             return;
         }
-        
+
         // Update the menu to reflect the change
         this.updateCurrentBrowser(browserId);
-        
+
         // Remove existing timeout if any
         if (this._timeoutId) {
             GLib.source_remove(this._timeoutId);
             this._timeoutId = null;
         }
-        
+
         // Close menu after selection (within 500ms as per requirement)
         this._timeoutId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 100, () => {
             this._indicator.menu.close();
             this._timeoutId = null;
             return GLib.SOURCE_REMOVE;
         });
-        
+
         // Notify callback if registered
         if (this._selectionCallback) {
             try {
@@ -181,17 +179,17 @@ class MenuBuilder {
      */
     updateCurrentBrowser(browserId) {
         // Remove checkmarks from all items
-        for (const [id, item] of this._menuItems) {
+        for (const [, item] of this._menuItems) {
             // Remove existing ornaments
             const children = item.get_children();
             for (const child of children) {
-                if (child instanceof St.Icon && 
+                if (child instanceof St.Icon &&
                     child.icon_name === 'object-select-symbolic') {
                     item.remove_child(child);
                 }
             }
         }
-        
+
         // Add checkmark to the new default browser
         const newDefaultItem = this._menuItems.get(browserId);
         if (newDefaultItem) {
@@ -228,7 +226,7 @@ class MenuBuilder {
             GLib.source_remove(this._timeoutId);
             this._timeoutId = null;
         }
-        
+
         this._menuItems.clear();
         this._selectionCallback = null;
         this._indicator = null;

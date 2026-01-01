@@ -1,6 +1,8 @@
 # Hidden directories
 .*
 !.gitignore
+!.github
+!.eslintrc.json
 
 # ZIP packages
 *.zip

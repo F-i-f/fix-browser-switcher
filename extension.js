@@ -24,32 +24,32 @@ export default class BrowserSwitcherExtension extends Extension {
      * Enable the extension
      * Called when the extension is enabled
      */
-    async enable() {
+    enable() {
         // Instantiate browser manager
         this._browserManager = new BrowserManager();
-        
-        // Wait for the manager to asynchronously get the current default browser
-        await this._browserManager.initialize();
-        
+
         // Create indicator with browser manager reference
         this._indicator = new BrowserIndicator(this._browserManager);
-        
+
         // Add indicator to system panel
         Main.panel.addToStatusArea('browser-switcher-indicator', this._indicator);
-        
+
         // Connect indicator to menu builder
         this._menuBuilder = new MenuBuilder(this._indicator, this._browserManager);
-        
+
         // Show the indicator
         this._indicator.show();
-        
-        // Explicitly update the icon after showing to ensure it displays correctly
-        // This fixes the issue where the default icon appears after restart
-        const currentBrowser = this._browserManager.getCachedDefaultBrowser();
-        console.log(`Browser Switcher: Post-initialization icon update for browser: ${currentBrowser}`);
-        if (currentBrowser) {
-            this._indicator.updateIcon(currentBrowser);
-        }
+
+        // Initialize browser manager asynchronously (non-blocking)
+        // This fetches the default browser and sets up file monitoring
+        this._browserManager.initialize().then(currentBrowser => {
+            console.log(`Browser Switcher: Initialized with browser: ${currentBrowser}`);
+            if (currentBrowser) {
+                this._indicator.updateIcon(currentBrowser);
+            }
+        }).catch(e => {
+            console.error(`Browser Switcher: Initialization error: ${e.message}`);
+        });
     }
 
     /**
@@ -62,13 +62,13 @@ export default class BrowserSwitcherExtension extends Extension {
             this._menuBuilder.destroy();
             this._menuBuilder = null;
         }
-        
+
         // Cleanup and remove indicator
         if (this._indicator) {
             this._indicator.destroy();
             this._indicator = null;
         }
-        
+
         // Cleanup browser manager
         if (this._browserManager) {
             this._browserManager.destroy();

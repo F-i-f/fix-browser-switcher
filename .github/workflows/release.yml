@@ -1,0 +1,62 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Extract changelog for version
+        id: changelog
+        run: |
+          # Extract section for current version from CHANGELOG.md
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          
+          # Get content between current version header and next version header (or end)
+          CHANGELOG=$(awk -v ver="$VERSION" '
+            /^## \[/ {
+              if (found) exit
+              if ($0 ~ "\\[" ver "\\]") found=1
+              next
+            }
+            found { print }
+          ' CHANGELOG.md)
+          
+          # Write to file for multiline support
+          echo "$CHANGELOG" > release_notes.md
+          
+          echo "Extracted changelog:"
+          cat release_notes.md
+
+      - name: Build extension package
+        run: |
+          # Create zip manually (gnome-extensions pack may not be available on CI)
+          zip -r browser-switcher@totoshko88.github.io.shell-extension.zip \
+            extension.js \
+            browserManager.js \
+            indicator.js \
+            menuBuilder.js \
+            metadata.json \
+            stylesheet.css
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Browser Switcher v${{ steps.version.outputs.VERSION }}
+          body_path: release_notes.md
+          files: browser-switcher@totoshko88.github.io.shell-extension.zip
+          draft: false
+          prerelease: false

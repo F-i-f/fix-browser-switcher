@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.1] - 2026-01-02
+
+### Fixed
+- Changed `enable()` from async to sync (GNOME extensions guidelines compliance)
+- File monitor signal now properly disconnected in `destroy()` (stored signal ID)
+- Removed async handler in file monitor callback (prevents potential issues)
+- Removed trailing whitespace in all source files
+- Removed unused imports: `Main` from indicator.js, `GObject` and `Gio` from menuBuilder.js
+- Fixed unused variable `id` in menuBuilder.js (changed to `[, item]` destructuring)
+- Fixed inconsistent indentation in indicator.js
+- Added missing newline at end of files
+
+### Added
+- ESLint configuration (`.eslintrc.json`) for code quality checks
+- GitHub Actions workflow for automated releases on tag push
+
+### Improved
+- README.md restructured for better readability:
+  - Added centered header with icon
+  - Navigation links at top
+  - Features displayed as table
+  - Cleaner section organization
+  - Removed redundant information
+
 ## [1.1.0] - 2024-11-22
 
 ### Fixed
