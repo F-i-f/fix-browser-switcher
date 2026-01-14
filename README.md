@@ -39,7 +39,7 @@ Perfect for users who work with different browser profiles for different tasks â
 
 ### From extensions.gnome.org (Recommended)
 
-Coming soon after initial release.
+https://extensions.gnome.org/extension/8836/browser-switcher/
 
 ### Manual Installation
 
