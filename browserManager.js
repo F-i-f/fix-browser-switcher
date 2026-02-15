@@ -50,12 +50,26 @@ class BrowserManager {
     _detectBrowsers() {
         this._browsers = [];
 
-        // Standard XDG directories to scan
-        const searchPaths = GLib.get_system_data_dirs();
-
-        for (const path of searchPaths) {
+        // System-wide XDG directories
+        const systemDirs = GLib.get_system_data_dirs();
+        for (const path of systemDirs) {
             this._scanDirectory(GLib.build_filenamev([path, 'applications']));
         }
+
+        // User-specific directories
+        const userAppDir = GLib.build_filenamev([
+            GLib.get_home_dir(), '.local', 'share', 'applications'
+        ]);
+        this._scanDirectory(userAppDir);
+
+        // Flatpak directories (user-installed and system-wide)
+        const flatpakUserDir = GLib.build_filenamev([
+            GLib.get_home_dir(), '.local', 'share', 'flatpak', 'exports', 'share', 'applications'
+        ]);
+        this._scanDirectory(flatpakUserDir);
+
+        const flatpakSystemDir = '/var/lib/flatpak/exports/share/applications';
+        this._scanDirectory(flatpakSystemDir);
 
         if (this._browsers.length === 0) {
             console.warn('Browser Switcher: No browsers found! Please install a web browser.');
