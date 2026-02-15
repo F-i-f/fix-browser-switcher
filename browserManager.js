@@ -154,9 +154,9 @@ class BrowserManager {
             };
 
             // Check for duplicates - avoid adding the same browser twice
-            // Check by both ID and executable path to catch different .desktop files for the same browser
+            // Check by ID only, since Flatpak browsers all use /usr/bin/flatpak as exec path
             const existingBrowser = this._browsers.find(b =>
-                b.id === browser.id || b.execPath === browser.execPath
+                b.id === browser.id
             );
             if (!existingBrowser) {
                 this._browsers.push(browser);
