@@ -36,10 +36,3 @@
 .popup-menu-item:insensitive {
     color: rgba(255, 255, 255, 0.5);
 }
-
-/* Menu separator styling */
-.popup-separator-menu-item {
-    height: 1px;
-    margin: 6px 0;
-    background-color: rgba(255, 255, 255, 0.1);
-}
