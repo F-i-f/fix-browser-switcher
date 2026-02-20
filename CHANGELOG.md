@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.1] - 2026-02-20
+
+### Fixed
+- Rebuild menu after async browser detection completes so browsers appear in the list
+
 ## [1.2.0] - 2026-02-20
 
 ### Fixed
