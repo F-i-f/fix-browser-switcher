@@ -51,14 +51,10 @@ class BrowserManager {
         this._browsers = [];
 
         // Standard XDG directories to scan
-        const searchPaths = [
-            '/usr/share/applications',
-            '/usr/local/share/applications',
-            GLib.build_filenamev([GLib.get_home_dir(), '.local/share/applications'])
-        ];
+        const searchPaths = GLib.get_system_data_dirs();
 
         for (const path of searchPaths) {
-            this._scanDirectory(path);
+            this._scanDirectory(GLib.build_filenamev([path, 'applications']));
         }
 
         if (this._browsers.length === 0) {
