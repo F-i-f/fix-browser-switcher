@@ -43,10 +43,8 @@ export default class BrowserSwitcherExtension extends Extension {
         // Initialize browser manager asynchronously (non-blocking)
         // This fetches the default browser and sets up file monitoring
         this._browserManager.initialize().then(currentBrowser => {
-            console.log(`Browser Switcher: Initialized with browser: ${currentBrowser}`);
-            if (currentBrowser) {
+            if (currentBrowser)
                 this._indicator.updateIcon(currentBrowser);
-            }
         }).catch(e => {
             console.error(`Browser Switcher: Initialization error: ${e.message}`);
         });

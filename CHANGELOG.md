@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2026-02-20
+
+### Fixed
+- Moved browser detection (`_detectBrowsers`) from constructor to `initialize()` — no I/O before `enable()` per GNOME review guidelines
+- Used `Gio._promisify()` for `communicate_utf8_async` and `wait_check_async` instead of manual Promise wrappers
+- Fixed `setDefaultBrowser()` now returns `boolean` — menu handler properly awaits result
+- Replaced manual checkmark `St.Icon` with built-in `PopupMenu.Ornament.CHECK` API (GNOME HIG compliant)
+- Removed global CSS overrides (`.system-status-icon`, `.popup-menu-item`, etc.) that affected all Shell elements
+- Removed unnecessary `GLib.timeout_add` for menu close — `PopupMenuItem` handles this automatically
+
+### Improved
+- Added debounce (250ms) to file monitor callback to prevent redundant `xdg-settings` calls
+- Reduced excessive logging — only errors and warnings are logged in production
+- Cleaner code: removed unused imports (`St`, `GLib`, `Clutter` from menuBuilder.js)
+
+### Added
+- GNOME Shell 50 support (beta)
+- GitHub Sponsors button (FUNDING.yml)
+- User data directory scanning (`GLib.get_user_data_dir()`) for user-installed browsers
+
 ## [1.1.1] - 2026-01-02
 
 ### Fixed

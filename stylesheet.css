@@ -1,38 +1,4 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /* Gnome Browser Switcher Extension Stylesheet */
 
-/* Indicator icon styling - ensures consistent appearance with system icons */
-.system-status-icon {
-    icon-size: 16px;
-}
-
-/* Browser menu item styling */
-.popup-menu-item {
-    spacing: 12px;
-}
-
-/* Browser icon in menu */
-.popup-menu-item .popup-menu-icon {
-    icon-size: 24px;
-}
-
-/* Checkmark ornament for current browser */
-.popup-menu-ornament {
-    icon-size: 16px;
-    margin-left: 8px;
-}
-
-/* Menu item hover state */
-.popup-menu-item:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-/* Menu item active state */
-.popup-menu-item:active {
-    background-color: rgba(255, 255, 255, 0.15);
-}
-
-/* Disabled menu item (for "No browsers found") */
-.popup-menu-item:insensitive {
-    color: rgba(255, 255, 255, 0.5);
-}
+/* No custom styles — uses standard GNOME Shell theme classes */
