@@ -64,16 +64,13 @@ gnome-extensions uninstall browser-switcher@totoshko88.github.io
 
 ## Requirements
 
-- Gnome Shell 45, 46, 47, 48, or 49
+- Gnome Shell 45–50
 - `xdg-utils` (pre-installed on most Linux distributions)
 - At least one web browser with a valid `.desktop` file
 
 ## How It Works
 
-**Browser Detection**: Scans XDG directories for `.desktop` files with `WebBrowser` category:
-- `/usr/share/applications`
-- `/usr/local/share/applications`
-- `~/.local/share/applications`
+**Browser Detection**: Scans all XDG data directories (`XDG_DATA_DIRS` + `XDG_DATA_HOME`) for `.desktop` files with `WebBrowser` category. This includes system packages, Flatpak, Snap, and user-installed browsers.
 
 **Default Browser Management**: Uses `xdg-settings` for cross-desktop compatibility.
 
